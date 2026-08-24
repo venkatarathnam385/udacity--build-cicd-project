@@ -4,6 +4,9 @@ on:
   pull_request:
     branches:
       - master
+    paths:
+      - 'starter/frontend/**'
+      - '.github/workflows/frontend-ci.yaml'
   workflow_dispatch:
 
 jobs:
@@ -11,15 +14,11 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: starter/frontend
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup NodeJS
         uses: actions/setup-node@v4
         with:
           node-version-file: starter/frontend/.nvmrc
@@ -27,24 +26,22 @@ jobs:
           cache-dependency-path: starter/frontend/package-lock.json
 
       - name: Install dependencies
+        working-directory: starter/frontend
         run: npm ci
 
       - name: Run lint
+        working-directory: starter/frontend
         run: npm run lint
 
   test:
     name: Test
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: starter/frontend
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup NodeJS
         uses: actions/setup-node@v4
         with:
           node-version-file: starter/frontend/.nvmrc
@@ -52,10 +49,12 @@ jobs:
           cache-dependency-path: starter/frontend/package-lock.json
 
       - name: Install dependencies
+        working-directory: starter/frontend
         run: npm ci
 
       - name: Run tests
-        run: npm run test
+        working-directory: starter/frontend
+        run: npm run test -- --watchAll=false
 
   build:
     name: Build Docker Image
@@ -68,7 +67,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup NodeJS
         uses: actions/setup-node@v4
         with:
           node-version-file: starter/frontend/.nvmrc
@@ -78,6 +77,10 @@ jobs:
       - name: Install dependencies
         working-directory: starter/frontend
         run: npm ci
+
+      - name: Run build
+        working-directory: starter/frontend
+        run: npm run build
 
       - name: Build Docker image
         working-directory: starter/frontend
